@@ -1,0 +1,39 @@
+name: Create Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name to create (e.g., v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+      message:
+        description: 'Message for the tag'
+        required: false
+        default: 'Release version'
+
+permissions:
+  contents: write  # Grant write access to the repository contents
+
+jobs:
+  create_tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+
+      - name: Create Tag
+        run: |
+          TAG_NAME="${{ github.event.inputs.tag_name }}"
+          TAG_MESSAGE="${{ github.event.inputs.message }}"
+          echo "Creating tag: $TAG_NAME"
+          git tag -a "$TAG_NAME" -m "$TAG_MESSAGE"
+          git push origin "$TAG_NAME"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Use the GITHUB_TOKEN for authentication
